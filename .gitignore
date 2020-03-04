@@ -1,0 +1,11 @@
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+
+# But not these files...
+!code_vars_design.pdf
+!code_vars_design.R
+!code_vars_design.Rmd
+!README.md
+!
