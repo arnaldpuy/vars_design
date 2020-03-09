@@ -1,0 +1,550 @@
+\PassOptionsToPackage{unicode=true}{hyperref} % options for packages loaded elsewhere
+\PassOptionsToPackage{hyphens}{url}
+%
+\documentclass[11pt,]{article}
+\usepackage{lmodern}
+\usepackage{amssymb,amsmath}
+\usepackage{ifxetex,ifluatex}
+\usepackage{fixltx2e} % provides \textsubscript
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provides euro and other symbols
+\else % if luatex or xelatex
+  \usepackage{unicode-math}
+  \defaultfontfeatures{Ligatures=TeX,Scale=MatchLowercase}
+\fi
+% use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+% use microtype if available
+\IfFileExists{microtype.sty}{%
+\usepackage[]{microtype}
+\UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\IfFileExists{parskip.sty}{%
+\usepackage{parskip}
+}{% else
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt plus 2pt minus 1pt}
+}
+\usepackage{hyperref}
+\hypersetup{
+            pdftitle={The Revenge Paper},
+            pdfauthor={Arnald Puy, Samuele Lo Piano, Andrea Saltelli},
+            pdfborder={0 0 0},
+            breaklinks=true}
+\urlstyle{same}  % don't use monospace font for urls
+\usepackage[margin=1in]{geometry}
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{248,248,248}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{#1}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.77,0.63,0.00}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\BuiltInTok}[1]{#1}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textbf{#1}}}
+\newcommand{\ExtensionTok}[1]{#1}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ImportTok}[1]{#1}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{#1}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\RegionMarkerTok}[1]{#1}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\usepackage{graphicx,grffile}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+\setlength{\emergencystretch}{3em}  % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{5}
+% Redefines (sub)paragraphs to behave more like sections
+\ifx\paragraph\undefined\else
+\let\oldparagraph\paragraph
+\renewcommand{\paragraph}[1]{\oldparagraph{#1}\mbox{}}
+\fi
+\ifx\subparagraph\undefined\else
+\let\oldsubparagraph\subparagraph
+\renewcommand{\subparagraph}[1]{\oldsubparagraph{#1}\mbox{}}
+\fi
+
+% set default figure placement to htbp
+\makeatletter
+\def\fps@figure{htbp}
+\makeatother
+
+\usepackage[font=footnotesize]{caption}
+\usepackage{dirtytalk}
+\usepackage{booktabs}
+\usepackage{tabulary}
+\usepackage{enumitem}
+\usepackage{lmodern}
+\usepackage[T1]{fontenc}
+
+\title{The Revenge Paper}
+\author{Arnald Puy, Samuele Lo Piano, Andrea Saltelli}
+\date{}
+
+\begin{document}
+\maketitle
+
+{
+\setcounter{tocdepth}{2}
+\tableofcontents
+}
+\newpage
+
+\hypertarget{preliminary-functions}{%
+\section{Preliminary functions}\label{preliminary-functions}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# PRELIMINARY FUNCTIONS -------------------------------------------------------}
+
+\CommentTok{# Function to read in all required packages in one go:}
+\NormalTok{loadPackages <-}\StringTok{ }\ControlFlowTok{function}\NormalTok{(x) \{}
+  \ControlFlowTok{for}\NormalTok{(i }\ControlFlowTok{in}\NormalTok{ x) \{}
+    \ControlFlowTok{if}\NormalTok{(}\OperatorTok{!}\KeywordTok{require}\NormalTok{(i, }\DataTypeTok{character.only =} \OtherTok{TRUE}\NormalTok{)) \{}
+      \KeywordTok{install.packages}\NormalTok{(i, }\DataTypeTok{dependencies =} \OtherTok{TRUE}\NormalTok{)}
+      \KeywordTok{library}\NormalTok{(i, }\DataTypeTok{character.only =} \OtherTok{TRUE}\NormalTok{)}
+\NormalTok{    \}}
+\NormalTok{  \}}
+\NormalTok{\}}
+
+\CommentTok{# Load the packages}
+\KeywordTok{loadPackages}\NormalTok{(}\KeywordTok{c}\NormalTok{(}\StringTok{"tidyverse"}\NormalTok{))}
+
+\CommentTok{# Create custom theme}
+\NormalTok{theme_AP <-}\StringTok{ }\ControlFlowTok{function}\NormalTok{() \{}
+  \KeywordTok{theme_bw}\NormalTok{() }\OperatorTok{+}
+\StringTok{    }\KeywordTok{theme}\NormalTok{(}\DataTypeTok{panel.grid.major =} \KeywordTok{element_blank}\NormalTok{(),}
+          \DataTypeTok{panel.grid.minor =} \KeywordTok{element_blank}\NormalTok{(),}
+          \DataTypeTok{legend.background =} \KeywordTok{element_rect}\NormalTok{(}\DataTypeTok{fill =} \StringTok{"transparent"}\NormalTok{,}
+                                           \DataTypeTok{color =} \OtherTok{NA}\NormalTok{),}
+          \DataTypeTok{legend.key =} \KeywordTok{element_rect}\NormalTok{(}\DataTypeTok{fill =} \StringTok{"transparent"}\NormalTok{,}
+                                    \DataTypeTok{color =} \OtherTok{NA}\NormalTok{))}
+\NormalTok{\}}
+
+\CommentTok{# Set checkpoint}
+
+\KeywordTok{dir.create}\NormalTok{(}\StringTok{".checkpoint"}\NormalTok{)}
+\KeywordTok{library}\NormalTok{(}\StringTok{"checkpoint"}\NormalTok{)}
+
+\KeywordTok{checkpoint}\NormalTok{(}\StringTok{"2020-03-09"}\NormalTok{, }
+           \DataTypeTok{R.version =}\StringTok{"3.6.2"}\NormalTok{, }
+           \DataTypeTok{checkpointLocation =} \KeywordTok{getwd}\NormalTok{())}
+\end{Highlighting}
+\end{Shaded}
+
+\newpage
+
+Here we define the code to produce STAR-VARS matrices using Sobol'
+quasi-random number sequences:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# FUNCTION TO CREATE STAR-VARS ------------------------------------------------}
+
+\NormalTok{star_vars <-}\StringTok{ }\ControlFlowTok{function}\NormalTok{(N, params, h) \{}
+\NormalTok{  out <-}\StringTok{ }\NormalTok{center <-}\StringTok{ }\NormalTok{sections <-}\StringTok{ }\NormalTok{A <-}\StringTok{ }\NormalTok{B <-}\StringTok{ }\NormalTok{AB <-}\StringTok{ }\NormalTok{X <-}\StringTok{ }\NormalTok{out <-}\StringTok{ }\KeywordTok{list}\NormalTok{()}
+\NormalTok{  mat <-}\StringTok{ }\NormalTok{randtoolbox}\OperatorTok{::}\KeywordTok{sobol}\NormalTok{(}\DataTypeTok{n =}\NormalTok{ N, }\DataTypeTok{dim =} \KeywordTok{length}\NormalTok{(params))}
+  \ControlFlowTok{for}\NormalTok{(i }\ControlFlowTok{in} \DecValTok{1}\OperatorTok{:}\KeywordTok{nrow}\NormalTok{(mat)) \{}
+\NormalTok{    center[[i]] <-}\StringTok{ }\NormalTok{mat[i, ]}
+\NormalTok{    sections[[i]] <-}\StringTok{ }\KeywordTok{sapply}\NormalTok{(center[[i]], }\ControlFlowTok{function}\NormalTok{(x) \{}
+\NormalTok{      all <-}\StringTok{ }\KeywordTok{seq}\NormalTok{(x }\OperatorTok{%%}\StringTok{ }\NormalTok{h, }\DecValTok{1}\NormalTok{, h)}
+\NormalTok{      non.zeros <-}\StringTok{ }\NormalTok{all[all}\OperatorTok{!=}\StringTok{ }\DecValTok{0}\NormalTok{] }\CommentTok{# Remove zeroes}
+\NormalTok{      \})}
+\NormalTok{    B[[i]] <-}\StringTok{ }\KeywordTok{sapply}\NormalTok{(}\DecValTok{1}\OperatorTok{:}\KeywordTok{ncol}\NormalTok{(mat), }\ControlFlowTok{function}\NormalTok{(x)}
+\NormalTok{      sections[[i]][, x][}\OperatorTok{!}\NormalTok{sections[[i]][, x] }\OperatorTok{%in%}\StringTok{ }\NormalTok{center[[i]][x]])}
+\NormalTok{    A[[i]] <-}\StringTok{ }\KeywordTok{matrix}\NormalTok{(center[[i]], }\DataTypeTok{nrow =} \KeywordTok{nrow}\NormalTok{(B[[i]]), }
+                     \DataTypeTok{ncol =} \KeywordTok{length}\NormalTok{(center[[i]]), }\DataTypeTok{byrow =} \OtherTok{TRUE}\NormalTok{)}
+\NormalTok{    X[[i]] <-}\StringTok{ }\KeywordTok{rbind}\NormalTok{(A[[i]], B[[i]])}
+    \ControlFlowTok{for}\NormalTok{(j }\ControlFlowTok{in} \DecValTok{1}\OperatorTok{:}\KeywordTok{ncol}\NormalTok{(A[[i]])) \{}
+\NormalTok{      AB[[i]] <-}\StringTok{ }\NormalTok{A[[i]]}
+\NormalTok{      AB[[i]][, j] <-}\StringTok{ }\NormalTok{B[[i]][, j]}
+\NormalTok{      X[[i]] <-}\StringTok{ }\KeywordTok{rbind}\NormalTok{(X[[i]], AB[[i]])}
+\NormalTok{    \}}
+\NormalTok{    AB[[i]] <-}\StringTok{ }\NormalTok{X[[i]][(}\DecValTok{2} \OperatorTok{*}\StringTok{ }\KeywordTok{nrow}\NormalTok{(B[[i]]) }\OperatorTok{+}\StringTok{ }\DecValTok{1}\NormalTok{)}\OperatorTok{:}\KeywordTok{nrow}\NormalTok{(X[[i]]), ]}
+\NormalTok{    out[[i]] <-}\StringTok{ }\KeywordTok{rbind}\NormalTok{(}\KeywordTok{unname}\NormalTok{(center[[i]]), AB[[i]])}
+\NormalTok{  \}}
+  \KeywordTok{return}\NormalTok{(}\KeywordTok{do.call}\NormalTok{(rbind, out))}
+\NormalTok{\}}
+
+\CommentTok{# Function to split matrices in n chunks}
+\NormalTok{CutBySize <-}\StringTok{ }\ControlFlowTok{function}\NormalTok{(m, block.size, }\DataTypeTok{nb =} \KeywordTok{ceiling}\NormalTok{(m }\OperatorTok{/}\StringTok{ }\NormalTok{block.size)) \{}
+\NormalTok{  int <-}\StringTok{ }\NormalTok{m }\OperatorTok{/}\StringTok{ }\NormalTok{nb}
+\NormalTok{  upper <-}\StringTok{ }\KeywordTok{round}\NormalTok{(}\DecValTok{1}\OperatorTok{:}\NormalTok{nb }\OperatorTok{*}\StringTok{ }\NormalTok{int)}
+\NormalTok{  lower <-}\StringTok{ }\KeywordTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{, upper[}\OperatorTok{-}\NormalTok{nb] }\OperatorTok{+}\StringTok{ }\DecValTok{1}\NormalTok{)}
+\NormalTok{  size <-}\StringTok{ }\KeywordTok{c}\NormalTok{(upper[}\DecValTok{1}\NormalTok{], }\KeywordTok{diff}\NormalTok{(upper))}
+  \KeywordTok{cbind}\NormalTok{(lower, upper, size)}
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+Now we create a STAR-VARS sample matrix with two star centers, \(h=0.1\)
+and three model inputs.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# DEFINE THE SETTINGS FOR A STAR-VARS SAMPLE MATRIX ---------------------------}
+
+\NormalTok{N <-}\StringTok{ }\DecValTok{2}
+\NormalTok{params <-}\StringTok{ }\KeywordTok{paste}\NormalTok{(}\StringTok{"X"}\NormalTok{, }\DecValTok{1}\OperatorTok{:}\DecValTok{3}\NormalTok{, }\DataTypeTok{sep =} \StringTok{""}\NormalTok{)}
+\NormalTok{h <-}\StringTok{ }\FloatTok{0.1}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# CREATE STAR-VARS ------------------------------------------------------------}
+
+\NormalTok{mat <-}\StringTok{ }\KeywordTok{star_vars}\NormalTok{(}\DataTypeTok{N =}\NormalTok{ N, }\DataTypeTok{params =}\NormalTok{ params, }\DataTypeTok{h =}\NormalTok{ h)}
+
+\KeywordTok{print}\NormalTok{(mat)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##       [,1] [,2] [,3]
+##  [1,] 0.50 0.50 0.50
+##  [2,] 0.10 0.50 0.50
+##  [3,] 0.20 0.50 0.50
+##  [4,] 0.30 0.50 0.50
+##  [5,] 0.40 0.50 0.50
+##  [6,] 0.60 0.50 0.50
+##  [7,] 0.70 0.50 0.50
+##  [8,] 0.80 0.50 0.50
+##  [9,] 0.90 0.50 0.50
+## [10,] 1.00 0.50 0.50
+## [11,] 0.50 0.10 0.50
+## [12,] 0.50 0.20 0.50
+## [13,] 0.50 0.30 0.50
+## [14,] 0.50 0.40 0.50
+## [15,] 0.50 0.60 0.50
+## [16,] 0.50 0.70 0.50
+## [17,] 0.50 0.80 0.50
+## [18,] 0.50 0.90 0.50
+## [19,] 0.50 1.00 0.50
+## [20,] 0.50 0.50 0.10
+## [21,] 0.50 0.50 0.20
+## [22,] 0.50 0.50 0.30
+## [23,] 0.50 0.50 0.40
+## [24,] 0.50 0.50 0.60
+## [25,] 0.50 0.50 0.70
+## [26,] 0.50 0.50 0.80
+## [27,] 0.50 0.50 0.90
+## [28,] 0.50 0.50 1.00
+## [29,] 0.75 0.25 0.75
+## [30,] 0.05 0.25 0.75
+## [31,] 0.15 0.25 0.75
+## [32,] 0.25 0.25 0.75
+## [33,] 0.35 0.25 0.75
+## [34,] 0.45 0.25 0.75
+## [35,] 0.55 0.25 0.75
+## [36,] 0.65 0.25 0.75
+## [37,] 0.85 0.25 0.75
+## [38,] 0.95 0.25 0.75
+## [39,] 0.75 0.05 0.75
+## [40,] 0.75 0.15 0.75
+## [41,] 0.75 0.35 0.75
+## [42,] 0.75 0.45 0.75
+## [43,] 0.75 0.55 0.75
+## [44,] 0.75 0.65 0.75
+## [45,] 0.75 0.75 0.75
+## [46,] 0.75 0.85 0.75
+## [47,] 0.75 0.95 0.75
+## [48,] 0.75 0.25 0.05
+## [49,] 0.75 0.25 0.15
+## [50,] 0.75 0.25 0.25
+## [51,] 0.75 0.25 0.35
+## [52,] 0.75 0.25 0.45
+## [53,] 0.75 0.25 0.55
+## [54,] 0.75 0.25 0.65
+## [55,] 0.75 0.25 0.85
+## [56,] 0.75 0.25 0.95
+\end{verbatim}
+
+Note that the first star center is in row 1; the second star center is
+in line 29. All stars thus have \(k((1/h) - 1)+1\) points (including the
+center), 28 rows per star in this specific case.
+
+Now we compute the model output with the Ishigami function:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# MODEL OUTPUT ----------------------------------------------------------------}
+
+\NormalTok{Y <-}\StringTok{ }\NormalTok{sensobol}\OperatorTok{::}\KeywordTok{ishigami_Fun}\NormalTok{(mat)}
+\end{Highlighting}
+\end{Shaded}
+
+Now we reorganize the data:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# REARRANGE DATA --------------------------------------------------------------}
+
+\NormalTok{n.cross.points <-}\StringTok{ }\KeywordTok{length}\NormalTok{(params) }\OperatorTok{*}\StringTok{ }\NormalTok{((}\DecValTok{1} \OperatorTok{/}\StringTok{ }\NormalTok{h) }\OperatorTok{-}\StringTok{ }\DecValTok{1}\NormalTok{) }\OperatorTok{+}\StringTok{ }\DecValTok{1}
+\NormalTok{index.centers <-}\StringTok{ }\KeywordTok{seq}\NormalTok{(}\DecValTok{1}\NormalTok{, }\KeywordTok{nrow}\NormalTok{(mat), n.cross.points)}
+\NormalTok{mat.nocenters <-}\StringTok{ }\KeywordTok{matrix}\NormalTok{(Y[}\OperatorTok{-}\NormalTok{index.centers], }\DataTypeTok{ncol =}\NormalTok{ N)}
+\NormalTok{mat.centers <-}\StringTok{ }\KeywordTok{matrix}\NormalTok{(Y[index.centers], }
+                      \DataTypeTok{nrow =} \KeywordTok{nrow}\NormalTok{(mat.nocenters) }\OperatorTok{+}\StringTok{ }\KeywordTok{length}\NormalTok{(params),}
+                      \DataTypeTok{ncol =}\NormalTok{ N, }
+                      \DataTypeTok{byrow =} \OtherTok{TRUE}\NormalTok{)}
+\NormalTok{location.centers <-}\StringTok{ }\KeywordTok{seq}\NormalTok{(}\DecValTok{1}\NormalTok{, }\KeywordTok{nrow}\NormalTok{(mat.nocenters), }\DecValTok{1} \OperatorTok{/}\StringTok{ }\NormalTok{h)}
+\NormalTok{mat.centers[}\OperatorTok{-}\NormalTok{location.centers, ] <-}\StringTok{ }\NormalTok{mat.nocenters}
+
+\NormalTok{indices <-}\StringTok{ }\KeywordTok{CutBySize}\NormalTok{(}\KeywordTok{nrow}\NormalTok{(mat.centers), }\DataTypeTok{nb =} \KeywordTok{length}\NormalTok{(params))}
+\NormalTok{out <-}\StringTok{ }\NormalTok{da <-}\StringTok{ }\KeywordTok{list}\NormalTok{()}
+\ControlFlowTok{for}\NormalTok{(i }\ControlFlowTok{in} \DecValTok{1}\OperatorTok{:}\KeywordTok{nrow}\NormalTok{(indices)) \{}
+\NormalTok{  out[[i]] <-}\StringTok{ }\NormalTok{mat.centers[indices[i, }\StringTok{"lower"}\NormalTok{]}\OperatorTok{:}\NormalTok{indices[i, }\StringTok{"upper"}\NormalTok{], ]}
+\NormalTok{\}}
+
+\KeywordTok{print}\NormalTok{(out)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [[1]]
+##                [,1]       [,2]
+##  [1,]  0.000000e+00  9.0880682
+##  [2,] -5.877853e-01 -0.1903335
+##  [3,] -9.510565e-01 -3.7343676
+##  [4,] -9.510565e-01 -5.0880682
+##  [5,] -5.877853e-01 -3.7343676
+##  [6,]  5.877853e-01 -0.1903335
+##  [7,]  9.510565e-01  4.1903335
+##  [8,]  9.510565e-01  7.7343676
+##  [9,]  5.877853e-01  7.7343676
+## [10,]  1.224647e-16  4.1903335
+## 
+## [[2]]
+##               [,1]     [,2]
+##  [1,] 0.000000e+00 9.088068
+##  [2,] 6.909830e-01 7.279051
+##  [3,] 1.809017e+00 8.397085
+##  [4,] 1.809017e+00 8.397085
+##  [5,] 6.909830e-01 7.279051
+##  [6,] 6.909830e-01 7.279051
+##  [7,] 1.809017e+00 8.397085
+##  [8,] 1.809017e+00 9.088068
+##  [9,] 6.909830e-01 8.397085
+## [10,] 2.999520e-32 7.279051
+## 
+## [[3]]
+##       [,1]      [,2]
+##  [1,]    0  9.088068
+##  [2,]    0 66.910105
+##  [3,]    0 26.387923
+##  [4,]    0  9.088068
+##  [5,]    0  3.789014
+##  [6,]    0  3.009741
+##  [7,]    0  3.009741
+##  [8,]    0  3.789014
+##  [9,]    0 26.387923
+## [10,]    0 66.910105
+\end{verbatim}
+
+The list of matrices above includes three slots for three model inputs.
+Each slot has two columns, each column being a star. The first row of
+each slot includes the star center.
+
+According to Razavi and Gupta, now we have to take pairs of points for
+each dimension, using all of the stars. Below I only print the output
+for the first parameter (first slot), where the two columns reflect all
+possible combinations between pairs of points, for one star and the
+other.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# EXTRACT PAIRS OF POINTS -----------------------------------------------------}
+
+\NormalTok{pairs.points <-}\StringTok{ }\KeywordTok{lapply}\NormalTok{(}\DecValTok{1}\OperatorTok{:}\KeywordTok{length}\NormalTok{(params), }\ControlFlowTok{function}\NormalTok{(x) }
+  \KeywordTok{lapply}\NormalTok{(}\DecValTok{1}\OperatorTok{:}\KeywordTok{ncol}\NormalTok{(out[[x]]), }\ControlFlowTok{function}\NormalTok{(y) }
+    \KeywordTok{t}\NormalTok{(}\KeywordTok{combn}\NormalTok{(out[[x]][, y], }\DecValTok{2}\NormalTok{))))}
+
+\NormalTok{pairs.points <-}\StringTok{ }\KeywordTok{lapply}\NormalTok{(pairs.points, }\ControlFlowTok{function}\NormalTok{(x) }\KeywordTok{do.call}\NormalTok{(rbind, x))}
+
+\KeywordTok{print}\NormalTok{(pairs.points[[}\DecValTok{1}\NormalTok{]])}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##             [,1]          [,2]
+##  [1,]  0.0000000 -5.877853e-01
+##  [2,]  0.0000000 -9.510565e-01
+##  [3,]  0.0000000 -9.510565e-01
+##  [4,]  0.0000000 -5.877853e-01
+##  [5,]  0.0000000  5.877853e-01
+##  [6,]  0.0000000  9.510565e-01
+##  [7,]  0.0000000  9.510565e-01
+##  [8,]  0.0000000  5.877853e-01
+##  [9,]  0.0000000  1.224647e-16
+## [10,] -0.5877853 -9.510565e-01
+## [11,] -0.5877853 -9.510565e-01
+## [12,] -0.5877853 -5.877853e-01
+## [13,] -0.5877853  5.877853e-01
+## [14,] -0.5877853  9.510565e-01
+## [15,] -0.5877853  9.510565e-01
+## [16,] -0.5877853  5.877853e-01
+## [17,] -0.5877853  1.224647e-16
+## [18,] -0.9510565 -9.510565e-01
+## [19,] -0.9510565 -5.877853e-01
+## [20,] -0.9510565  5.877853e-01
+## [21,] -0.9510565  9.510565e-01
+## [22,] -0.9510565  9.510565e-01
+## [23,] -0.9510565  5.877853e-01
+## [24,] -0.9510565  1.224647e-16
+## [25,] -0.9510565 -5.877853e-01
+## [26,] -0.9510565  5.877853e-01
+## [27,] -0.9510565  9.510565e-01
+## [28,] -0.9510565  9.510565e-01
+## [29,] -0.9510565  5.877853e-01
+## [30,] -0.9510565  1.224647e-16
+## [31,] -0.5877853  5.877853e-01
+## [32,] -0.5877853  9.510565e-01
+## [33,] -0.5877853  9.510565e-01
+## [34,] -0.5877853  5.877853e-01
+## [35,] -0.5877853  1.224647e-16
+## [36,]  0.5877853  9.510565e-01
+## [37,]  0.5877853  9.510565e-01
+## [38,]  0.5877853  5.877853e-01
+## [39,]  0.5877853  1.224647e-16
+## [40,]  0.9510565  9.510565e-01
+## [41,]  0.9510565  5.877853e-01
+## [42,]  0.9510565  1.224647e-16
+## [43,]  0.9510565  5.877853e-01
+## [44,]  0.9510565  1.224647e-16
+## [45,]  0.5877853  1.224647e-16
+## [46,]  9.0880682 -1.903335e-01
+## [47,]  9.0880682 -3.734368e+00
+## [48,]  9.0880682 -5.088068e+00
+## [49,]  9.0880682 -3.734368e+00
+## [50,]  9.0880682 -1.903335e-01
+## [51,]  9.0880682  4.190334e+00
+## [52,]  9.0880682  7.734368e+00
+## [53,]  9.0880682  7.734368e+00
+## [54,]  9.0880682  4.190334e+00
+## [55,] -0.1903335 -3.734368e+00
+## [56,] -0.1903335 -5.088068e+00
+## [57,] -0.1903335 -3.734368e+00
+## [58,] -0.1903335 -1.903335e-01
+## [59,] -0.1903335  4.190334e+00
+## [60,] -0.1903335  7.734368e+00
+## [61,] -0.1903335  7.734368e+00
+## [62,] -0.1903335  4.190334e+00
+## [63,] -3.7343676 -5.088068e+00
+## [64,] -3.7343676 -3.734368e+00
+## [65,] -3.7343676 -1.903335e-01
+## [66,] -3.7343676  4.190334e+00
+## [67,] -3.7343676  7.734368e+00
+## [68,] -3.7343676  7.734368e+00
+## [69,] -3.7343676  4.190334e+00
+## [70,] -5.0880682 -3.734368e+00
+## [71,] -5.0880682 -1.903335e-01
+## [72,] -5.0880682  4.190334e+00
+## [73,] -5.0880682  7.734368e+00
+## [74,] -5.0880682  7.734368e+00
+## [75,] -5.0880682  4.190334e+00
+## [76,] -3.7343676 -1.903335e-01
+## [77,] -3.7343676  4.190334e+00
+## [78,] -3.7343676  7.734368e+00
+## [79,] -3.7343676  7.734368e+00
+## [80,] -3.7343676  4.190334e+00
+## [81,] -0.1903335  4.190334e+00
+## [82,] -0.1903335  7.734368e+00
+## [83,] -0.1903335  7.734368e+00
+## [84,] -0.1903335  4.190334e+00
+## [85,]  4.1903335  7.734368e+00
+## [86,]  4.1903335  7.734368e+00
+## [87,]  4.1903335  4.190334e+00
+## [88,]  7.7343676  7.734368e+00
+## [89,]  7.7343676  4.190334e+00
+## [90,]  7.7343676  4.190334e+00
+\end{verbatim}
+
+Now I assume that I can compute the variogram, using the following
+formula:
+
+\begin{equation}
+\gamma_i(h) = \frac{1}{2N_h} \sum_{j=1}^{N_h}(y_j^{i(h)} - y_j)^2
+\end{equation}
+
+where \(N_h\) is the number of pairs differing by a distance \(h\).
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# COMPUTE VARIOGRAM -----------------------------------------------------------}
+
+\CommentTok{# Define formula}
+\NormalTok{variogram <-}\StringTok{ }\ControlFlowTok{function}\NormalTok{(x) }\DecValTok{1}\OperatorTok{/}\StringTok{ }\NormalTok{(}\DecValTok{2} \OperatorTok{*}\StringTok{ }\KeywordTok{nrow}\NormalTok{(x)) }\OperatorTok{*}\StringTok{ }\KeywordTok{sum}\NormalTok{(x[, }\DecValTok{1}\NormalTok{] }\OperatorTok{-}\StringTok{ }\NormalTok{x[, }\DecValTok{2}\NormalTok{]) }\OperatorTok{^}\StringTok{ }\DecValTok{2}
+
+\CommentTok{# Compute}
+\NormalTok{variogr <-}\StringTok{ }\KeywordTok{unlist}\NormalTok{(}\KeywordTok{lapply}\NormalTok{(pairs.points, variogram))}
+
+\NormalTok{variogr}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 86.4416043  0.1388889 60.9403561
+\end{verbatim}
+
+These three numbers reflect the variogram for the three parameters.
+
+Now, the covariogram. According to Razavi and Gupta, it should be
+computed as follows:
+
+\begin{equation}
+C(h) = \frac{1}{2} COV(y_j^{i(h)}, y_j)
+\end{equation}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# COMPUTE COVARIOGRAM ---------------------------------------------------------}
+
+\NormalTok{covariog <-}\StringTok{ }\KeywordTok{unlist}\NormalTok{(}\KeywordTok{lapply}\NormalTok{(pairs.points, }\ControlFlowTok{function}\NormalTok{(x) (}\DecValTok{1} \OperatorTok{/}\StringTok{ }\DecValTok{2}\NormalTok{) }\OperatorTok{*}\StringTok{ }\KeywordTok{cov}\NormalTok{(x[, }\DecValTok{1}\NormalTok{], x[, }\DecValTok{2}\NormalTok{])))}
+
+\NormalTok{covariog}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1]  0.02875857  6.32295188 44.18338262
+\end{verbatim}
+
+I am not sure if the covariogram results make much sense\ldots{}
+
+How do I compute the total variance?
+
+\end{document}

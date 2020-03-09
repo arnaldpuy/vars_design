@@ -46,7 +46,7 @@ variance_f <- function(x) {
 }
 
 # SETTINGS --------------------------------------------------------------------
-N <- 10
+N <- 2
 params <- paste("X", 1:3, sep = "")
 h <- 0.1
 
@@ -59,11 +59,169 @@ nrow(mat) == N * (length(params) * ((1 / h) -1) + 1)
 # Compute model output
 Y <- sensobol::ishigami_Fun(mat)
 
-# Number of points (star centers + cross-section points)
-n.cross.points <- length(params) * ((1 / h) - 1) + 1 
+# Index for star centers
+length(params) * ((1 / h) - 1) + 1
+
+index.centers <- seq(1, nrow(mat), n.cross.points)
+mat.nocenters <- matrix(Y[-index.centers], ncol = N)
+mat.centers <- matrix(Y[index.centers], 
+                      nrow = nrow(mat.nocenters) + length(params),
+                      ncol = N, 
+                      byrow = TRUE)
+location.centers <- seq(1, nrow(mat.nocenters), 1 / h)
+mat.centers[-location.centers, ] <- mat.nocenters
+
+indices <- CutBySize(nrow(mat.centers), nb = length(params))
+
+out <- list()
+for(i in 1:nrow(indices)) {
+  out[[i]] <- mat.centers[indices[i, "lower"]:indices[i, "upper"], ]
+}
+
+tmp <- lapply(1:length(params), function(x) 
+  lapply(1:ncol(out[[x]]), function(y) 
+    t(combn(out[[x]][, y], 2))))
+
+prove2 <- lapply(tmp, function(x) do.call(rbind, x))
+
+
+# Compute variogram
+variogr <- unlist(lapply(prove2, variogram))
+
+# Covariogram
+covariog <- unlist(lapply(prove2, function(x) 1 / (2 * nrow(x)) * cov(x[, 1], x[, 2])))
+
+# Total variance
+VY <- unlist(lapply(prove2, variance_f))
+
+# Final value
+(variogr - covariog) / VY
+
+
+
+
+
+
+
+cross.section.mat <- matrix(Y[-index.centers], ncol = N)
+
+indices <- CutBySize(nrow(cross.section.mat), nb = length(params))
+
+# List of Matrices: each slot is a model input. The first row in each
+# slot is the star centers. Each column is a star.
+out <- list()
+for(i in 1:nrow(indices)) {
+  out[[i]] <- cross.section.mat[indices[i, "lower"]:indices[i, "upper"], ]
+  out[[i]] <- rbind(Y[index.centers], out[[i]])
+}
+
+
+
+
+
+
+
+
+
+
+
+
+mat.without.centers <- matrix(Y[-index.centers], ncol = N)
+
+
+
+
+
+
+mat.without.centers <- matrix(Y[-index.centers], ncol = N)
+
+location.centers <- seq(1, nrow(mat.without.centers), 1 / h)
+
+new.mat <- matrix(Y[index.centers], 
+                  nrow = nrow(mat.without.centers) + length(params), 
+                  ncol = N, 
+                  byrow = TRUE)
+
+new.mat[-index.centers, ] <- mat.without.centers
+
+
+
+
+
+
+
+
+
+
+
+
+mat.without <- matrix(Y[-index.centers], ncol = N)
+
+new.mat <- matrix(0, nrow = nrow(mat.without) + length(index.centers), 
+                  ncol = ncol(mat.without))
+
+new_mat[-index.centers,] <- Y[index.centers]   
+new_mat
+
+
+matrix(Y, ncol = N)
+
+Y.without.centers <- Y[-index.centers]
+
+chunk2 <- function(x,n) split(x, cut(seq_along(x), n, labels = FALSE)) 
+
+lapply(chunk2(Y.without.centers, n = N), 
+       function(x) chunk2(x, n = length(params)))
+
+
+
+
+
+
+mat <- matrix(1:18,6)
+vec <- c(2, 5, 6)
+
+# New matrix 'new_mat' with all zeros, 
+# No. of rows = original matrix rows + number new rows to be added
+new_mat <- matrix(Y[index.centers], 
+                  nrow = nrow(mat.without) + length(index.centers), 
+                  ncol = N, 
+                  byrow = TRUE)
+
+new_mat[-index.centers, ] <- mat.without
+
+
+
+
+
+
+
+
+
+
+
+# 'new_mat' rows getting filled with `mat` values
+new_mat[-vec,] <- mat   
+new_mat
+
 
 # Index for star centers
 index.centers <- seq(1, nrow(mat), n.cross.points)
+
+mat.without <- matrix(Y[-index.centers], ncol = N)
+
+new.mat <- matrix(0, 
+                  nrow = nrow(mat.without) + length(index.centers), 
+                  ncol = ncol(mat.without))
+
+new.mat[-index.centers] <- mat.without
+
+
+
+
+
+
+
 
 # Matrix with only the cross-section points 
 cross.section.mat <- matrix(Y[-index.centers], ncol = N)
@@ -78,12 +236,23 @@ for(i in 1:nrow(indices)) {
   out[[i]] <- rbind(Y[index.centers], out[[i]])
 }
 
+
+
+
+
+
+
+
+
+
 # Each slot is a parameter, all stars are row-binded
 prove <- lapply(1:length(params), function(x) 
   lapply(1:ncol(out[[x]]), function(y) 
   t(combn(out[[x]][, y], 2))))
 
 prove2 <- lapply(prove, function(x) do.call(rbind, x))
+
+sum(sapply(1:10, function(x) N * (( 1 / h) - x)))
 
 # Compute variogram
 variogr <- unlist(lapply(prove2, variogram))

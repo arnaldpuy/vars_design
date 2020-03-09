@@ -1,0 +1,232 @@
+---
+title: "The Revenge Paper"
+author: "Arnald Puy, Samuele Lo Piano, Andrea Saltelli"
+header-includes:
+  - \usepackage[font=footnotesize]{caption}
+  - \usepackage{dirtytalk}
+  - \usepackage{booktabs}
+  - \usepackage{tabulary}
+  - \usepackage{enumitem}
+  - \usepackage{lmodern}
+  - \usepackage[T1]{fontenc}
+output:
+  pdf_document:
+    fig_caption: yes
+    number_sections: yes
+    toc: yes
+    toc_depth: 2
+    keep_tex: true
+  word_document:
+    toc: no
+    toc_depth: '2'
+  html_document:
+    keep_md: true
+link-citations: yes
+fontsize: 11pt
+bibliography: /Users/arnald/Documents/bibtex/LATEX_density.bib
+
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+\newpage
+
+# Preliminary functions
+
+```{r preliminary steps, results="hide", message=FALSE, warning=FALSE}
+
+# PRELIMINARY FUNCTIONS -------------------------------------------------------
+
+# Function to read in all required packages in one go:
+loadPackages <- function(x) {
+  for(i in x) {
+    if(!require(i, character.only = TRUE)) {
+      install.packages(i, dependencies = TRUE)
+      library(i, character.only = TRUE)
+    }
+  }
+}
+
+# Load the packages
+loadPackages(c("tidyverse"))
+
+# Create custom theme
+theme_AP <- function() {
+  theme_bw() +
+    theme(panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          legend.background = element_rect(fill = "transparent",
+                                           color = NA),
+          legend.key = element_rect(fill = "transparent",
+                                    color = NA))
+}
+
+# Set checkpoint
+
+dir.create(".checkpoint")
+library("checkpoint")
+
+checkpoint("2020-03-09", 
+           R.version ="3.6.2", 
+           checkpointLocation = getwd())
+```
+
+\newpage
+
+Here we define the code to produce STAR-VARS matrices using Sobol' quasi-random number sequences:
+
+```{r star_function, cache=TRUE}
+
+# FUNCTION TO CREATE STAR-VARS ------------------------------------------------
+
+star_vars <- function(N, params, h) {
+  out <- center <- sections <- A <- B <- AB <- X <- out <- list()
+  mat <- randtoolbox::sobol(n = N, dim = length(params))
+  for(i in 1:nrow(mat)) {
+    center[[i]] <- mat[i, ]
+    sections[[i]] <- sapply(center[[i]], function(x) {
+      all <- seq(x %% h, 1, h)
+      non.zeros <- all[all!= 0] # Remove zeroes
+      })
+    B[[i]] <- sapply(1:ncol(mat), function(x)
+      sections[[i]][, x][!sections[[i]][, x] %in% center[[i]][x]])
+    A[[i]] <- matrix(center[[i]], nrow = nrow(B[[i]]), 
+                     ncol = length(center[[i]]), byrow = TRUE)
+    X[[i]] <- rbind(A[[i]], B[[i]])
+    for(j in 1:ncol(A[[i]])) {
+      AB[[i]] <- A[[i]]
+      AB[[i]][, j] <- B[[i]][, j]
+      X[[i]] <- rbind(X[[i]], AB[[i]])
+    }
+    AB[[i]] <- X[[i]][(2 * nrow(B[[i]]) + 1):nrow(X[[i]]), ]
+    out[[i]] <- rbind(unname(center[[i]]), AB[[i]])
+  }
+  return(do.call(rbind, out))
+}
+
+# Function to split matrices in n chunks
+CutBySize <- function(m, block.size, nb = ceiling(m / block.size)) {
+  int <- m / nb
+  upper <- round(1:nb * int)
+  lower <- c(1, upper[-nb] + 1)
+  size <- c(upper[1], diff(upper))
+  cbind(lower, upper, size)
+}
+```
+
+Now we create a STAR-VARS sample matrix with two star centers, $h=0.1$ and three model inputs.
+
+```{r settings}
+
+# DEFINE THE SETTINGS FOR A STAR-VARS SAMPLE MATRIX ---------------------------
+
+N <- 2
+params <- paste("X", 1:3, sep = "")
+h <- 0.1
+```
+
+```{r star, cache=TRUE, dependson="settings"}
+
+# CREATE STAR-VARS ------------------------------------------------------------
+
+mat <- star_vars(N = N, params = params, h = h)
+
+print(mat)
+```
+
+Note that the first star center is in row 1; the second star center is in line 29. All stars thus have $k((1/h) - 1)+1$ points (including the center),  28 rows per star in this specific case.
+
+Now we compute the model output with the Ishigami function:
+
+```{r output, cache=TRUE, dependson="star"}
+
+# MODEL OUTPUT ----------------------------------------------------------------
+
+Y <- sensobol::ishigami_Fun(mat)
+```
+
+Now we reorganize the data:
+
+```{r arrange, cache=TRUE, dependson="output"}
+
+# REARRANGE DATA --------------------------------------------------------------
+
+n.cross.points <- length(params) * ((1 / h) - 1) + 1
+index.centers <- seq(1, nrow(mat), n.cross.points)
+mat.nocenters <- matrix(Y[-index.centers], ncol = N)
+mat.centers <- matrix(Y[index.centers], 
+                      nrow = nrow(mat.nocenters) + length(params),
+                      ncol = N, 
+                      byrow = TRUE)
+location.centers <- seq(1, nrow(mat.nocenters), 1 / h)
+mat.centers[-location.centers, ] <- mat.nocenters
+
+indices <- CutBySize(nrow(mat.centers), nb = length(params))
+out <- da <- list()
+for(i in 1:nrow(indices)) {
+  out[[i]] <- mat.centers[indices[i, "lower"]:indices[i, "upper"], ]
+}
+
+print(out)
+```
+
+The list of matrices above includes three slots for three model inputs. Each slot has two columns, each column being a star. The first row of each slot includes the star center. 
+
+According to Razavi and Gupta, now we have to take pairs of points for each dimension, using all of the stars. Below I only print the output for the first parameter (first slot), where the two columns reflect all possible combinations between pairs of points, for one star and the other.
+
+```{r pairs, cache=TRUE, dependson="arrange"}
+
+# EXTRACT PAIRS OF POINTS -----------------------------------------------------
+
+pairs.points <- lapply(1:length(params), function(x) 
+  lapply(1:ncol(out[[x]]), function(y) 
+    t(combn(out[[x]][, y], 2))))
+
+pairs.points <- lapply(pairs.points, function(x) do.call(rbind, x))
+
+print(pairs.points[[1]])
+```
+
+Now I assume that I can compute the variogram, using the following formula:
+
+\begin{equation}
+\gamma_i(h) = \frac{1}{2N_h} \sum_{j=1}^{N_h}(y_j^{i(h)} - y_j)^2
+\end{equation}
+
+where $N_h$ is the number of pairs differing by a distance $h$.
+
+```{r variogram, cache=TRUE, dependson="pairs"}
+
+# COMPUTE VARIOGRAM -----------------------------------------------------------
+
+# Define formula
+variogram <- function(x) 1/ (2 * nrow(x)) * sum(x[, 1] - x[, 2]) ^ 2
+
+# Compute
+variogr <- unlist(lapply(pairs.points, variogram))
+
+variogr
+```
+
+These three numbers reflect the variogram for the three parameters.
+
+Now, the covariogram. According to Razavi and Gupta, it should be computed as follows:
+
+\begin{equation}
+C(h) = \frac{1}{2} COV(y_j^{i(h)}, y_j)
+\end{equation}
+
+```{r covariogram, cache=TRUE, dependson="variogram"}
+
+# COMPUTE COVARIOGRAM ---------------------------------------------------------
+
+covariog <- unlist(lapply(pairs.points, function(x) (1 / 2) * cov(x[, 1], x[, 2])))
+
+covariog
+````
+
+I am not sure if the covariogram results make much sense...
+
+How do I compute the total variance?
