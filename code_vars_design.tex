@@ -161,7 +161,7 @@
 \KeywordTok{library}\NormalTok{(}\StringTok{"checkpoint"}\NormalTok{)}
 
 \KeywordTok{checkpoint}\NormalTok{(}\StringTok{"2020-03-09"}\NormalTok{, }
-           \DataTypeTok{R.version =}\StringTok{"3.6.2"}\NormalTok{, }
+           \DataTypeTok{R.version =}\StringTok{"3.6.1"}\NormalTok{, }
            \DataTypeTok{checkpointLocation =} \KeywordTok{getwd}\NormalTok{())}
 \end{Highlighting}
 \end{Shaded}
@@ -533,14 +533,14 @@ C(h) = \frac{1}{2} COV(y_j^{i(h)}, y_j)
 \begin{Highlighting}[]
 \CommentTok{# COMPUTE COVARIOGRAM ---------------------------------------------------------}
 
-\NormalTok{covariog <-}\StringTok{ }\KeywordTok{unlist}\NormalTok{(}\KeywordTok{lapply}\NormalTok{(pairs.points, }\ControlFlowTok{function}\NormalTok{(x) (}\DecValTok{1} \OperatorTok{/}\StringTok{ }\DecValTok{2}\NormalTok{) }\OperatorTok{*}\StringTok{ }\KeywordTok{cov}\NormalTok{(x[, }\DecValTok{1}\NormalTok{], x[, }\DecValTok{2}\NormalTok{])))}
+\NormalTok{covariog <-}\StringTok{ }\KeywordTok{unlist}\NormalTok{(}\KeywordTok{lapply}\NormalTok{(pairs.points, }\ControlFlowTok{function}\NormalTok{(x) }\DecValTok{1} \OperatorTok{/}\StringTok{ }\NormalTok{(}\DecValTok{2} \OperatorTok{*}\StringTok{ }\KeywordTok{nrow}\NormalTok{(x)) }\OperatorTok{*}\StringTok{ }\KeywordTok{cov}\NormalTok{(x[, }\DecValTok{1}\NormalTok{], x[, }\DecValTok{2}\NormalTok{])))}
 
 \NormalTok{covariog}
 \end{Highlighting}
 \end{Shaded}
 
 \begin{verbatim}
-## [1]  0.02875857  6.32295188 44.18338262
+## [1] 0.0003195397 0.0702550209 0.4909264736
 \end{verbatim}
 
 I am not sure if the covariogram results make much sense\ldots{}

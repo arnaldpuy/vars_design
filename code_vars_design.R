@@ -47,7 +47,7 @@ variance_f <- function(x) {
 
 # SETTINGS --------------------------------------------------------------------
 N <- 2
-params <- paste("X", 1:3, sep = "")
+params <- paste("X", 1:8, sep = "")
 h <- 0.1
 
 # Create STAR-VARS
@@ -57,10 +57,10 @@ mat <- vars_matrices(N = N, params = params, h = h)
 nrow(mat) == N * (length(params) * ((1 / h) -1) + 1)
 
 # Compute model output
-Y <- sensobol::ishigami_Fun(mat)
+Y <- sensobol::sobol_Fun(mat)
 
 # Index for star centers
-length(params) * ((1 / h) - 1) + 1
+n.cross.points <- length(params) * ((1 / h) - 1) + 1
 
 index.centers <- seq(1, nrow(mat), n.cross.points)
 mat.nocenters <- matrix(Y[-index.centers], ncol = N)
@@ -86,19 +86,50 @@ prove2 <- lapply(tmp, function(x) do.call(rbind, x))
 
 
 # Compute variogram
-variogr <- unlist(lapply(prove2, variogram))
+variogr <- unlist(lapply(prove2, function(x) 1/ (2 * nrow(x)) * sum(x[, 1] - x[, 2]) ^ 2))
 
 # Covariogram
 covariog <- unlist(lapply(prove2, function(x) 1 / (2 * nrow(x)) * cov(x[, 1], x[, 2])))
 
 # Total variance
-VY <- unlist(lapply(prove2, variance_f))
+VY <- variance_f(do.call(rbind, prove2))
 
 # Final value
-(variogr - covariog) / VY
+(variogr + covariog) / VY
 
 
 
+# COMPARISON WITH JANSEN ------------------------
+N <- 1000
+params <- paste("X", 1:3, sep = "")
+mat <- sensobol::sobol_matrices(N = N, params = params)
+Y <- sensobol::ishigami_Fun(mat)
+
+k <- length(params)
+m <- matrix(Y, nrow = N)
+
+Y_A <- m[, 1]
+Y_B <- m[, 2]
+Y_AB <- m[, -c(1, 2)]
+f0 <- 1 / (2 * N) * sum(Y_A + Y_B)
+VY <- 1 / (2 * N - 1) * sum((Y_A - f0) ^ 2 + (Y_B - f0) ^ 2)
+
+Vi <- 1 / (2 * N) * Rfast::colsums((Y_A - Y_AB) ^ 2) 
+
+Vi/VY
+
+lapply(prove2, function(x) (1 / 2 * var(x[, 1] - x[, 2]) ^ 2)  + cov(x[, 1], x[, 2]))
+
+
+
+
+
+
+
+
+
+f0 <- (1 / N) * sum(m[, 1] * m[, 2])
+VY <- 1 / (2 * N - 1) * sum(m[, 1] ^ 2 + m[, 2] ^ 2) - f0
 
 
 
