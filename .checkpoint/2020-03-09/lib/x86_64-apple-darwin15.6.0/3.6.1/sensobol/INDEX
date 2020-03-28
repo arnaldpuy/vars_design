@@ -1,0 +1,19 @@
+bratley1988_Fun         Bratley and Fox (1988) function
+bratley1992_Fun         Bratley, Fox and Niederreiter (1992) function
+ishigami_Mapply         Ishigami function
+oakley_Fun              Oakley & O'Hagan (2004) function
+plot_scatter            Scatterplots of the model output against the
+                        model inputs
+plot_sobol              Plot Sobol' first and total-order indices
+plot_uncertainty        Plot model output uncertainty
+sobol_Fun               Sobol' G function
+sobol_ci                Bootstrap confidence intervals for Sobol'
+                        indices.
+sobol_ci_dummy          Bootstrap confidence intervals for the dummy
+                        parameter
+sobol_dummy             Computation of Sobol' indices for a dummy
+                        parameter
+sobol_indices           Computation of first, second, third and
+                        total-order Sobol' indices
+sobol_matrices          Creation of the sample matrices
+sobol_replicas          Extract bootstrap replicas
