@@ -138,7 +138,7 @@
 \NormalTok{remotes}\OperatorTok{::}\KeywordTok{install_github}\NormalTok{(}\StringTok{"arnaldpuy/sensobol"}\NormalTok{)}
 
 \CommentTok{# Load the packages}
-\KeywordTok{loadPackages}\NormalTok{(}\KeywordTok{c}\NormalTok{(}\StringTok{"tidyverse"}\NormalTok{, }\StringTok{"sensobol"}\NormalTok{))}
+\KeywordTok{loadPackages}\NormalTok{(}\KeywordTok{c}\NormalTok{(}\StringTok{"tidyverse"}\NormalTok{, }\StringTok{"sensobol"}\NormalTok{, }\StringTok{"data.table"}\NormalTok{))}
 
 
 
@@ -170,6 +170,8 @@
 \begin{Highlighting}[]
 \CommentTok{# FUNCTION TO CREATE STAR-VARS ------------------------------------------------}
 
+\CommentTok{# CROSS-SECTIONS WITHOUT STAR CENTER-----------------------------}
+
 \NormalTok{vars_matrices <-}\StringTok{ }\ControlFlowTok{function}\NormalTok{(N, params, h) \{}
 \NormalTok{  out <-}\StringTok{ }\NormalTok{center <-}\StringTok{ }\NormalTok{sections <-}\StringTok{ }\NormalTok{A <-}\StringTok{ }\NormalTok{B <-}\StringTok{ }\NormalTok{AB <-}\StringTok{ }\NormalTok{X <-}\StringTok{ }\NormalTok{out <-}\StringTok{ }\KeywordTok{list}\NormalTok{()}
 \NormalTok{  mat <-}\StringTok{ }\NormalTok{randtoolbox}\OperatorTok{::}\KeywordTok{sobol}\NormalTok{(}\DataTypeTok{n =}\NormalTok{ N, }\DataTypeTok{dim =} \KeywordTok{length}\NormalTok{(params))}
@@ -178,10 +180,11 @@
 \NormalTok{    sections[[i]] <-}\StringTok{ }\KeywordTok{sapply}\NormalTok{(center[[i]], }\ControlFlowTok{function}\NormalTok{(x) \{}
 \NormalTok{      all <-}\StringTok{ }\KeywordTok{seq}\NormalTok{(x }\OperatorTok{%%}\StringTok{ }\NormalTok{h, }\DecValTok{1}\NormalTok{, h)}
 \NormalTok{      non.zeros <-}\StringTok{ }\NormalTok{all[all}\OperatorTok{!=}\StringTok{ }\DecValTok{0}\NormalTok{] }\CommentTok{# Remove zeroes}
-\NormalTok{      \})}
+\NormalTok{    \})}
 \NormalTok{    B[[i]] <-}\StringTok{ }\KeywordTok{sapply}\NormalTok{(}\DecValTok{1}\OperatorTok{:}\KeywordTok{ncol}\NormalTok{(mat), }\ControlFlowTok{function}\NormalTok{(x) }
 \NormalTok{      sections[[i]][, x][}\OperatorTok{!}\NormalTok{sections[[i]][, x] }\OperatorTok{%in%}\StringTok{ }\NormalTok{center[[i]][x]])}
-\NormalTok{    A[[i]] <-}\StringTok{ }\KeywordTok{matrix}\NormalTok{(center[[i]], }\DataTypeTok{nrow =} \KeywordTok{nrow}\NormalTok{(B[[i]]), }\DataTypeTok{ncol =} \KeywordTok{length}\NormalTok{(center[[i]]), }\DataTypeTok{byrow =} \OtherTok{TRUE}\NormalTok{)}
+\NormalTok{    A[[i]] <-}\StringTok{ }\KeywordTok{matrix}\NormalTok{(center[[i]], }\DataTypeTok{nrow =} \KeywordTok{nrow}\NormalTok{(B[[i]]), }
+                     \DataTypeTok{ncol =} \KeywordTok{length}\NormalTok{(center[[i]]), }\DataTypeTok{byrow =} \OtherTok{TRUE}\NormalTok{)}
 \NormalTok{    X[[i]] <-}\StringTok{ }\KeywordTok{rbind}\NormalTok{(A[[i]], B[[i]])}
     \ControlFlowTok{for}\NormalTok{(j }\ControlFlowTok{in} \DecValTok{1}\OperatorTok{:}\KeywordTok{ncol}\NormalTok{(A[[i]])) \{}
 \NormalTok{      AB[[i]] <-}\StringTok{ }\NormalTok{A[[i]]}
@@ -220,14 +223,85 @@
 \NormalTok{              out[[x]][, j][}\KeywordTok{length}\NormalTok{(out[[x]][, j])])}
 \NormalTok{    \}))}
 \NormalTok{  out <-}\StringTok{ }\KeywordTok{lapply}\NormalTok{(d, }\ControlFlowTok{function}\NormalTok{(x) }\KeywordTok{lapply}\NormalTok{(x, }\ControlFlowTok{function}\NormalTok{(y) }\KeywordTok{matrix}\NormalTok{(y, }\DataTypeTok{nrow =} \KeywordTok{length}\NormalTok{(y) }\OperatorTok{/}\StringTok{ }\DecValTok{2}\NormalTok{, }\DataTypeTok{byrow =} \OtherTok{TRUE}\NormalTok{)))}
-\NormalTok{  variogr <-}\StringTok{ }\KeywordTok{unlist}\NormalTok{(}\KeywordTok{lapply}\NormalTok{(out, }\ControlFlowTok{function}\NormalTok{(x)}
-    \KeywordTok{lapply}\NormalTok{(x, }\ControlFlowTok{function}\NormalTok{(y) }\DecValTok{1} \OperatorTok{/}\StringTok{ }\DecValTok{2} \OperatorTok{*}\StringTok{ }\KeywordTok{mean}\NormalTok{(y[, }\DecValTok{1}\NormalTok{] }\OperatorTok{-}\StringTok{ }\NormalTok{y[, }\DecValTok{2}\NormalTok{]) }\OperatorTok{^}\StringTok{ }\DecValTok{2}\NormalTok{)) }\OperatorTok{%>%}
-\StringTok{      }\KeywordTok{lapply}\NormalTok{(., }\ControlFlowTok{function}\NormalTok{(x) Rfast}\OperatorTok{::}\KeywordTok{colmeans}\NormalTok{(}\KeywordTok{do.call}\NormalTok{(rbind, x))))}
+\NormalTok{  variogr <-}\StringTok{ }\KeywordTok{unlist}\NormalTok{(}\KeywordTok{lapply}\NormalTok{(out, }\ControlFlowTok{function}\NormalTok{(x) }\KeywordTok{lapply}\NormalTok{(x, }\ControlFlowTok{function}\NormalTok{(y) }
+    \KeywordTok{mean}\NormalTok{(}\FloatTok{0.5} \OperatorTok{*}\StringTok{ }\NormalTok{(y[, }\DecValTok{1}\NormalTok{] }\OperatorTok{-}\StringTok{ }\NormalTok{y[, }\DecValTok{2}\NormalTok{]) }\OperatorTok{^}\StringTok{ }\DecValTok{2}\NormalTok{))) }\OperatorTok{%>%}
+\StringTok{      }\KeywordTok{lapply}\NormalTok{(., }\ControlFlowTok{function}\NormalTok{(x) }\KeywordTok{do.call}\NormalTok{(rbind, x)) }\OperatorTok{%>%}
+\StringTok{      }\KeywordTok{lapply}\NormalTok{(., mean))}
 \NormalTok{  covariogr <-}\StringTok{ }\KeywordTok{unlist}\NormalTok{(}\KeywordTok{lapply}\NormalTok{(out, }\ControlFlowTok{function}\NormalTok{(x)}
     \KeywordTok{lapply}\NormalTok{(x, }\ControlFlowTok{function}\NormalTok{(y) }\KeywordTok{cov}\NormalTok{(y[, }\DecValTok{1}\NormalTok{], y[, }\DecValTok{2}\NormalTok{]))) }\OperatorTok{%>%}
 \StringTok{      }\KeywordTok{lapply}\NormalTok{(., }\ControlFlowTok{function}\NormalTok{(x) Rfast}\OperatorTok{::}\KeywordTok{colmeans}\NormalTok{(}\KeywordTok{do.call}\NormalTok{(rbind, x))))}
 \NormalTok{  VY <-}\StringTok{ }\KeywordTok{var}\NormalTok{(Y[index.centers])}
-\NormalTok{  output <-}\StringTok{ }\NormalTok{(variogr }\OperatorTok{+}\StringTok{ }\NormalTok{covariogr) }\OperatorTok{/}\StringTok{ }\NormalTok{VY}
+\NormalTok{  Ti <-}\StringTok{ }\NormalTok{(variogr }\OperatorTok{+}\StringTok{ }\NormalTok{covariogr) }\OperatorTok{/}\StringTok{ }\NormalTok{VY}
+\NormalTok{  output <-}\StringTok{ }\NormalTok{data.table}\OperatorTok{::}\KeywordTok{data.table}\NormalTok{(Ti)}
+\NormalTok{  output[, }\StringTok{`}\DataTypeTok{:=}\StringTok{`}\NormalTok{(}\DataTypeTok{parameters =}\NormalTok{ params)]}
+  \KeywordTok{return}\NormalTok{(output)}
+\NormalTok{\}}
+
+
+\CommentTok{# CROSS-SECTIONS WITH STAR CENTER ----------------------------------}
+
+\NormalTok{vars_matrices_NEW <-}\StringTok{ }\ControlFlowTok{function}\NormalTok{(N, params, h) \{}
+\NormalTok{  out <-}\StringTok{ }\NormalTok{center <-}\StringTok{ }\NormalTok{sections <-}\StringTok{ }\NormalTok{A <-}\StringTok{ }\NormalTok{B <-}\StringTok{ }\NormalTok{AB <-}\StringTok{ }\NormalTok{X <-}\StringTok{ }\NormalTok{out <-}\StringTok{ }\KeywordTok{list}\NormalTok{()}
+\NormalTok{  mat <-}\StringTok{ }\NormalTok{randtoolbox}\OperatorTok{::}\KeywordTok{sobol}\NormalTok{(}\DataTypeTok{n =}\NormalTok{ N, }\DataTypeTok{dim =} \KeywordTok{length}\NormalTok{(params))}
+  \ControlFlowTok{for}\NormalTok{(i }\ControlFlowTok{in} \DecValTok{1}\OperatorTok{:}\KeywordTok{nrow}\NormalTok{(mat)) \{}
+\NormalTok{    center[[i]] <-}\StringTok{ }\NormalTok{mat[i, ]}
+\NormalTok{    sections[[i]] <-}\StringTok{ }\KeywordTok{sapply}\NormalTok{(mat[i, ], }\ControlFlowTok{function}\NormalTok{(x) \{}
+\NormalTok{      all <-}\StringTok{ }\KeywordTok{seq}\NormalTok{(x }\OperatorTok{%%}\StringTok{ }\NormalTok{h, }\DecValTok{1}\NormalTok{, h)}
+\NormalTok{      non.zeros <-}\StringTok{ }\NormalTok{all[all}\OperatorTok{!=}\StringTok{ }\DecValTok{0}\NormalTok{] }\CommentTok{# Remove zeroes}
+\NormalTok{    \})}
+\NormalTok{    A[[i]] <-}\StringTok{ }\KeywordTok{matrix}\NormalTok{(mat[i, ], }\DataTypeTok{nrow =} \KeywordTok{nrow}\NormalTok{(sections[[i]]), }
+                     \DataTypeTok{ncol =} \KeywordTok{ncol}\NormalTok{(mat), }\DataTypeTok{byrow =} \OtherTok{TRUE}\NormalTok{)}
+\NormalTok{    X[[i]] <-}\StringTok{ }\KeywordTok{rbind}\NormalTok{(A[[i]], sections[[i]])}
+    \ControlFlowTok{for}\NormalTok{(j }\ControlFlowTok{in} \DecValTok{1}\OperatorTok{:}\KeywordTok{ncol}\NormalTok{(A[[i]])) \{}
+\NormalTok{      AB[[i]] <-}\StringTok{ }\NormalTok{A[[i]]}
+\NormalTok{      AB[[i]][, j] <-}\StringTok{ }\NormalTok{sections[[i]][, j]}
+\NormalTok{      X[[i]] <-}\StringTok{ }\KeywordTok{rbind}\NormalTok{(X[[i]], AB[[i]])}
+\NormalTok{    \}}
+\NormalTok{    AB[[i]] <-}\StringTok{ }\NormalTok{X[[i]][(}\DecValTok{2} \OperatorTok{*}\StringTok{ }\KeywordTok{nrow}\NormalTok{(sections[[i]]) }\OperatorTok{+}\StringTok{ }\DecValTok{1}\NormalTok{)}\OperatorTok{:}\KeywordTok{nrow}\NormalTok{(X[[i]]), ]}
+\NormalTok{  \}}
+\NormalTok{  star.vars <-}\StringTok{ }\KeywordTok{do.call}\NormalTok{(rbind, AB)}
+\NormalTok{  tmp <-}\StringTok{ }\KeywordTok{lapply}\NormalTok{(}\DecValTok{1}\OperatorTok{:}\NormalTok{N, }\ControlFlowTok{function}\NormalTok{(x) }
+    \KeywordTok{rowSums}\NormalTok{(star.vars }\OperatorTok{==}\StringTok{ }\NormalTok{mat[x, ][}\KeywordTok{col}\NormalTok{(star.vars)]) }\OperatorTok{==}\StringTok{ }\KeywordTok{ncol}\NormalTok{(star.vars)) }
+\NormalTok{  indices.star.output <-}\StringTok{ }\KeywordTok{unlist}\NormalTok{(}\KeywordTok{lapply}\NormalTok{(}\DecValTok{1}\OperatorTok{:}\NormalTok{N, }\ControlFlowTok{function}\NormalTok{(x) }\KeywordTok{which}\NormalTok{(tmp[[x]] }\OperatorTok{==}\StringTok{ }\OtherTok{TRUE}\NormalTok{)[}\DecValTok{1}\NormalTok{]))}
+  \KeywordTok{return}\NormalTok{(}\KeywordTok{list}\NormalTok{(star.vars, indices.star.output))}
+\NormalTok{\}}
+
+\NormalTok{pairs_tmp <-}\StringTok{ }\ControlFlowTok{function}\NormalTok{(x, h) \{}
+\NormalTok{  da <-}\StringTok{ }\KeywordTok{list}\NormalTok{()}
+  \ControlFlowTok{for}\NormalTok{(i }\ControlFlowTok{in} \DecValTok{1}\OperatorTok{:}\NormalTok{((}\DecValTok{1}\OperatorTok{/}\NormalTok{h) }\OperatorTok{-}\StringTok{ }\DecValTok{1}\NormalTok{)) \{}
+\NormalTok{    da[[i]] <-}\StringTok{ }\KeywordTok{c}\NormalTok{(x[i], x[i}\OperatorTok{+}\DecValTok{1}\NormalTok{])}
+\NormalTok{  \}}
+\NormalTok{  out <-}\StringTok{ }\KeywordTok{do.call}\NormalTok{(rbind, da)}
+  \KeywordTok{return}\NormalTok{(out)}
+\NormalTok{\}}
+
+\NormalTok{pairs_fun <-}\StringTok{ }\ControlFlowTok{function}\NormalTok{(x, h) \{}
+\NormalTok{  da <-}\StringTok{ }\KeywordTok{list}\NormalTok{()}
+  \ControlFlowTok{for}\NormalTok{(j }\ControlFlowTok{in} \DecValTok{1}\OperatorTok{:}\KeywordTok{ncol}\NormalTok{(x)) \{}
+\NormalTok{    da[[j]] <-}\StringTok{ }\KeywordTok{pairs_tmp}\NormalTok{(x[, j], }\DataTypeTok{h =}\NormalTok{ h)}
+\NormalTok{  \}}
+  \KeywordTok{return}\NormalTok{(da)}
+\NormalTok{\}}
+
+\NormalTok{vars_ti_NEW <-}\StringTok{ }\ControlFlowTok{function}\NormalTok{(Y, N, indices.var, params, h) \{}
+\NormalTok{  mat <-}\StringTok{ }\KeywordTok{matrix}\NormalTok{(Y, }\DataTypeTok{ncol =}\NormalTok{ N)}
+\NormalTok{  indices <-}\StringTok{ }\KeywordTok{CutBySize}\NormalTok{(}\KeywordTok{nrow}\NormalTok{(mat), }\DataTypeTok{nb =} \KeywordTok{length}\NormalTok{(params))}
+\NormalTok{  out <-}\StringTok{ }\KeywordTok{list}\NormalTok{()}
+  \ControlFlowTok{for}\NormalTok{(i }\ControlFlowTok{in} \DecValTok{1}\OperatorTok{:}\KeywordTok{nrow}\NormalTok{(indices)) \{}
+\NormalTok{    out[[i]] <-}\StringTok{ }\NormalTok{mat[indices[i, }\StringTok{"lower"}\NormalTok{]}\OperatorTok{:}\NormalTok{indices[i, }\StringTok{"upper"}\NormalTok{], ]}
+\NormalTok{  \}}
+\NormalTok{  d <-}\StringTok{ }\KeywordTok{lapply}\NormalTok{(out, }\ControlFlowTok{function}\NormalTok{(x) }\KeywordTok{pairs_fun}\NormalTok{(x, }\DataTypeTok{h =}\NormalTok{ h))}
+\NormalTok{  variogr <-}\StringTok{ }\KeywordTok{unlist}\NormalTok{(}\KeywordTok{lapply}\NormalTok{(d, }\ControlFlowTok{function}\NormalTok{(x) }\KeywordTok{lapply}\NormalTok{(x, }\ControlFlowTok{function}\NormalTok{(y) }
+    \KeywordTok{mean}\NormalTok{(}\FloatTok{0.5} \OperatorTok{*}\StringTok{ }\NormalTok{(y[, }\DecValTok{1}\NormalTok{] }\OperatorTok{-}\StringTok{ }\NormalTok{y[, }\DecValTok{2}\NormalTok{]) }\OperatorTok{^}\StringTok{ }\DecValTok{2}\NormalTok{))) }\OperatorTok{%>%}
+\StringTok{      }\KeywordTok{lapply}\NormalTok{(., }\ControlFlowTok{function}\NormalTok{(x) }\KeywordTok{do.call}\NormalTok{(rbind, x)) }\OperatorTok{%>%}
+\StringTok{      }\KeywordTok{lapply}\NormalTok{(., mean))}
+\NormalTok{  covariogr <-}\StringTok{ }\KeywordTok{unlist}\NormalTok{(}\KeywordTok{lapply}\NormalTok{(d, }\ControlFlowTok{function}\NormalTok{(x)}
+    \KeywordTok{lapply}\NormalTok{(x, }\ControlFlowTok{function}\NormalTok{(y) }\KeywordTok{cov}\NormalTok{(y[, }\DecValTok{1}\NormalTok{], y[, }\DecValTok{2}\NormalTok{]))) }\OperatorTok{%>%}
+\StringTok{      }\KeywordTok{lapply}\NormalTok{(., }\ControlFlowTok{function}\NormalTok{(x) Rfast}\OperatorTok{::}\KeywordTok{colmeans}\NormalTok{(}\KeywordTok{do.call}\NormalTok{(rbind, x))))}
+\NormalTok{  VY <-}\StringTok{ }\KeywordTok{var}\NormalTok{(Y[indices.var])}
+\NormalTok{  Ti <-}\StringTok{ }\NormalTok{(variogr }\OperatorTok{+}\StringTok{ }\NormalTok{covariogr) }\OperatorTok{/}\StringTok{ }\NormalTok{VY}
+\NormalTok{  output <-}\StringTok{ }\NormalTok{data.table}\OperatorTok{::}\KeywordTok{data.table}\NormalTok{(Ti)}
+\NormalTok{  output[, }\StringTok{`}\DataTypeTok{:=}\StringTok{`}\NormalTok{(}\DataTypeTok{parameters =}\NormalTok{ params)]}
   \KeywordTok{return}\NormalTok{(output)}
 \NormalTok{\}}
 \end{Highlighting}
@@ -235,52 +309,49 @@
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\CommentTok{# DEFINE THE SETTINGS FOR A STAR-VARS SAMPLE MATRIX ---------------------------}
+\CommentTok{# COMPARE RESULTS  ------------------------------------------------------------}
 
-\NormalTok{N <-}\StringTok{ }\DecValTok{200} \CommentTok{# Star centers}
-\NormalTok{h <-}\StringTok{ }\FloatTok{0.1} \CommentTok{# h step}
-\end{Highlighting}
-\end{Shaded}
+\NormalTok{vars_type <-}\StringTok{ }\KeywordTok{c}\NormalTok{(}\StringTok{"With"}\NormalTok{, }\StringTok{"Without"}\NormalTok{)}
+\NormalTok{test_functions <-}\StringTok{ }\KeywordTok{c}\NormalTok{(}\StringTok{"Ishigami"}\NormalTok{, }\StringTok{"Sobol' G"}\NormalTok{, }\StringTok{"Morris"}\NormalTok{)}
+\NormalTok{N <-}\StringTok{ }\DecValTok{200}
+\NormalTok{h <-}\StringTok{ }\FloatTok{0.2}
 
-\begin{Shaded}
-\begin{Highlighting}[]
-\CommentTok{# VARS-TO FOR THE ISHIGAMI FUNCTION -------------------------------------------}
-
-\NormalTok{params <-}\StringTok{ }\KeywordTok{paste}\NormalTok{(}\StringTok{"X"}\NormalTok{, }\DecValTok{1}\OperatorTok{:}\DecValTok{3}\NormalTok{, }\DataTypeTok{sep =} \StringTok{""}\NormalTok{)}
-\NormalTok{mat <-}\StringTok{ }\KeywordTok{vars_matrices}\NormalTok{(}\DataTypeTok{N =}\NormalTok{ N, }\DataTypeTok{params =}\NormalTok{ params, }\DataTypeTok{h =}\NormalTok{ h)}
-\NormalTok{Y <-}\StringTok{ }\NormalTok{sensobol}\OperatorTok{::}\KeywordTok{ishigami_Fun}\NormalTok{(mat)}
-\NormalTok{output <-}\StringTok{ }\KeywordTok{vars_ti}\NormalTok{(}\DataTypeTok{Y =}\NormalTok{ Y, }\DataTypeTok{N =}\NormalTok{ N, }\DataTypeTok{params =}\NormalTok{ params, }\DataTypeTok{h =}\NormalTok{ h)}
-\KeywordTok{print}\NormalTok{(}\KeywordTok{round}\NormalTok{(output, }\DecValTok{3}\NormalTok{))}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{verbatim}
-## [1] 0.960 0.000 0.215
-\end{verbatim}
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\CommentTok{# VARS-TO FOR THE SOBOL' G FUNCTION -------------------------------------------}
-
-\NormalTok{params <-}\StringTok{ }\KeywordTok{paste}\NormalTok{(}\StringTok{"X"}\NormalTok{, }\DecValTok{1}\OperatorTok{:}\DecValTok{8}\NormalTok{, }\DataTypeTok{sep =} \StringTok{""}\NormalTok{)}
-\NormalTok{mat <-}\StringTok{ }\KeywordTok{vars_matrices}\NormalTok{(}\DataTypeTok{N =}\NormalTok{ N, }\DataTypeTok{params =}\NormalTok{ params, }\DataTypeTok{h =}\NormalTok{ h)}
-\NormalTok{Y <-}\StringTok{ }\NormalTok{sensobol}\OperatorTok{::}\KeywordTok{sobol_Fun}\NormalTok{(mat)}
-\NormalTok{output <-}\StringTok{ }\KeywordTok{vars_ti}\NormalTok{(}\DataTypeTok{Y =}\NormalTok{ Y, }\DataTypeTok{N =}\NormalTok{ N, }\DataTypeTok{params =}\NormalTok{ params, }\DataTypeTok{h =}\NormalTok{ h)}
-\KeywordTok{print}\NormalTok{(}\KeywordTok{round}\NormalTok{(output, }\DecValTok{3}\NormalTok{))}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{verbatim}
-## [1] 0.565 0.171 0.024 0.007 0.000 0.000 0.000 0.000
-\end{verbatim}
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\CommentTok{# VARS-TO FOR THE MORRIS FUNCTION -------------------------------------------}
-
-\NormalTok{params <-}\StringTok{ }\KeywordTok{paste}\NormalTok{(}\StringTok{"X"}\NormalTok{, }\DecValTok{1}\OperatorTok{:}\DecValTok{20}\NormalTok{, }\DataTypeTok{sep =} \StringTok{""}\NormalTok{)}
-\NormalTok{mat <-}\StringTok{ }\KeywordTok{vars_matrices}\NormalTok{(}\DataTypeTok{N =}\NormalTok{ N, }\DataTypeTok{params =}\NormalTok{ params, }\DataTypeTok{h =}\NormalTok{ h)}
-\NormalTok{Y <-}\StringTok{ }\NormalTok{sensitivity}\OperatorTok{::}\KeywordTok{morris.fun}\NormalTok{(mat)}
+\CommentTok{# Run model}
+\NormalTok{mat <-}\StringTok{ }\NormalTok{Y <-}\StringTok{ }\NormalTok{ind <-}\StringTok{ }\KeywordTok{list}\NormalTok{()}
+\ControlFlowTok{for}\NormalTok{(i }\ControlFlowTok{in}\NormalTok{ test_functions) \{}
+  \ControlFlowTok{for}\NormalTok{(j }\ControlFlowTok{in}\NormalTok{ vars_type) \{}
+    \ControlFlowTok{if}\NormalTok{(i }\OperatorTok{==}\StringTok{ "Ishigami"}\NormalTok{) \{}
+\NormalTok{      k <-}\StringTok{ }\DecValTok{3}
+\NormalTok{      modelRun <-}\StringTok{ }\NormalTok{sensobol}\OperatorTok{::}\NormalTok{ishigami_Fun}
+\NormalTok{    \} }\ControlFlowTok{else} \ControlFlowTok{if}\NormalTok{(i }\OperatorTok{==}\StringTok{ "Sobol' G"}\NormalTok{) \{}
+\NormalTok{      k <-}\StringTok{ }\DecValTok{8}
+\NormalTok{      modelRun <-}\StringTok{ }\NormalTok{sensobol}\OperatorTok{::}\NormalTok{sobol_Fun}
+\NormalTok{    \} }\ControlFlowTok{else} \ControlFlowTok{if}\NormalTok{(i }\OperatorTok{==}\StringTok{ "Morris"}\NormalTok{) \{}
+\NormalTok{      k <-}\StringTok{ }\DecValTok{20}
+\NormalTok{      modelRun <-}\StringTok{ }\NormalTok{sensitivity}\OperatorTok{::}\NormalTok{morris.fun}
+\NormalTok{    \}}
+    \ControlFlowTok{if}\NormalTok{(j }\OperatorTok{==}\StringTok{ "With"}\NormalTok{) \{}
+\NormalTok{      mat[[i]][[j]] <-}\StringTok{ }\KeywordTok{vars_matrices_NEW}\NormalTok{(}\DataTypeTok{N =}\NormalTok{ N, }
+                                         \DataTypeTok{params =} \KeywordTok{paste}\NormalTok{(}\StringTok{"X"}\NormalTok{, }\DecValTok{1}\OperatorTok{:}\NormalTok{k, }\DataTypeTok{sep =} \StringTok{""}\NormalTok{), }
+                                         \DataTypeTok{h =}\NormalTok{ h)}
+\NormalTok{      Y[[i]][[j]] <-}\StringTok{ }\KeywordTok{modelRun}\NormalTok{(mat[[i]][[j]][[}\DecValTok{1}\NormalTok{]])}
+\NormalTok{      ind[[i]][[j]] <-}\StringTok{ }\KeywordTok{vars_ti_NEW}\NormalTok{(}\DataTypeTok{Y =}\NormalTok{ Y[[i]][[j]], }
+                                   \DataTypeTok{N =}\NormalTok{ N, }
+                                   \DataTypeTok{indices.var =}\NormalTok{ mat[[i]][[j]][[}\DecValTok{2}\NormalTok{]], }
+                                   \DataTypeTok{params =} \KeywordTok{paste}\NormalTok{(}\StringTok{"X"}\NormalTok{, }\DecValTok{1}\OperatorTok{:}\NormalTok{k, }\DataTypeTok{sep =} \StringTok{""}\NormalTok{), }
+                                   \DataTypeTok{h =}\NormalTok{ h)}
+\NormalTok{    \} }\ControlFlowTok{else} \ControlFlowTok{if}\NormalTok{(j }\OperatorTok{==}\StringTok{ "Without"}\NormalTok{) \{}
+\NormalTok{      mat[[i]][[j]] <-}\StringTok{ }\KeywordTok{vars_matrices}\NormalTok{(}\DataTypeTok{N =}\NormalTok{ N, }
+                                     \DataTypeTok{params =} \KeywordTok{paste}\NormalTok{(}\StringTok{"X"}\NormalTok{, }\DecValTok{1}\OperatorTok{:}\NormalTok{k, }\DataTypeTok{sep =} \StringTok{""}\NormalTok{), }
+                                     \DataTypeTok{h =}\NormalTok{ h)}
+\NormalTok{      Y[[i]][[j]] <-}\StringTok{ }\KeywordTok{modelRun}\NormalTok{(mat[[i]][[j]])}
+\NormalTok{      ind[[i]][[j]] <-}\StringTok{ }\KeywordTok{vars_ti}\NormalTok{(}\DataTypeTok{Y =}\NormalTok{ Y[[i]][[j]], }
+                                   \DataTypeTok{N =}\NormalTok{ N, }
+                                   \DataTypeTok{params =} \KeywordTok{paste}\NormalTok{(}\StringTok{"X"}\NormalTok{, }\DecValTok{1}\OperatorTok{:}\NormalTok{k, }\DataTypeTok{sep =} \StringTok{""}\NormalTok{), }
+                                   \DataTypeTok{h =}\NormalTok{ h)}
+\NormalTok{    \}}
+\NormalTok{  \}}
+\NormalTok{\}}
 \end{Highlighting}
 \end{Shaded}
 
@@ -292,14 +363,31 @@
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\NormalTok{output <-}\StringTok{ }\KeywordTok{vars_ti}\NormalTok{(}\DataTypeTok{Y =}\NormalTok{ Y, }\DataTypeTok{N =}\NormalTok{ N, }\DataTypeTok{params =}\NormalTok{ params, }\DataTypeTok{h =}\NormalTok{ h)}
-\KeywordTok{print}\NormalTok{(}\KeywordTok{round}\NormalTok{(output, }\DecValTok{3}\NormalTok{))}
+\CommentTok{# PLOT RESULTS ----------------------------------------------------------------}
+
+\KeywordTok{lapply}\NormalTok{(ind, }\ControlFlowTok{function}\NormalTok{(x) }\KeywordTok{rbindlist}\NormalTok{(x, }\DataTypeTok{idcol =} \StringTok{"Type"}\NormalTok{)) }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{rbindlist}\NormalTok{(., }\DataTypeTok{idcol =} \StringTok{"Function"}\NormalTok{) }\OperatorTok{%>%}
+\StringTok{  }\NormalTok{.[, parameters}\OperatorTok{:}\ErrorTok{=}\StringTok{ }\KeywordTok{factor}\NormalTok{(parameters, }\DataTypeTok{levels =} \KeywordTok{paste}\NormalTok{(}\StringTok{"X"}\NormalTok{, }\DecValTok{1}\OperatorTok{:}\DecValTok{20}\NormalTok{, }\DataTypeTok{sep =} \StringTok{""}\NormalTok{))] }\OperatorTok{%>%}
+\StringTok{  }\NormalTok{.[, Function}\OperatorTok{:}\ErrorTok{=}\StringTok{ }\KeywordTok{factor}\NormalTok{(Function, }\DataTypeTok{levels =}\NormalTok{ test_functions)] }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{ggplot}\NormalTok{(., }\KeywordTok{aes}\NormalTok{(parameters, Ti, }\DataTypeTok{fill =}\NormalTok{ Type)) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom_bar}\NormalTok{(}\DataTypeTok{stat =} \StringTok{"identity"}\NormalTok{,}
+           \DataTypeTok{position =} \KeywordTok{position_dodge}\NormalTok{(}\FloatTok{0.7}\NormalTok{),}
+           \DataTypeTok{color =} \StringTok{"black"}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{scale_fill_discrete}\NormalTok{(}\DataTypeTok{name =} \KeywordTok{expression}\NormalTok{(}\KeywordTok{paste}\NormalTok{(}\StringTok{"VARS "}\OperatorTok{~}\NormalTok{T[}\KeywordTok{italic}\NormalTok{(i)])),}
+                      \DataTypeTok{labels =} \KeywordTok{c}\NormalTok{(}\StringTok{"With star center"}\NormalTok{, }\StringTok{"Without star center"}\NormalTok{)) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{facet_grid}\NormalTok{(}\OperatorTok{~}\NormalTok{Function,}
+             \DataTypeTok{scales =} \StringTok{"free_x"}\NormalTok{,}
+             \DataTypeTok{space =} \StringTok{"free_x"}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{x =} \StringTok{""}\NormalTok{,}
+       \DataTypeTok{y =} \KeywordTok{expression}\NormalTok{(T[}\KeywordTok{italic}\NormalTok{(i)])) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{theme_AP}\NormalTok{() }\OperatorTok{+}
+\StringTok{  }\KeywordTok{theme}\NormalTok{(}\DataTypeTok{axis.text.x =} \KeywordTok{element_text}\NormalTok{(}\DataTypeTok{size =} \FloatTok{6.5}\NormalTok{),}
+        \DataTypeTok{legend.position =} \StringTok{"top"}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{guides}\NormalTok{(}\DataTypeTok{fill =} \KeywordTok{guide_legend}\NormalTok{(}\DataTypeTok{nrow =} \DecValTok{3}\NormalTok{,}
+                             \DataTypeTok{byrow =} \OtherTok{TRUE}\NormalTok{))}
 \end{Highlighting}
 \end{Shaded}
 
-\begin{verbatim}
-##  [1] 0.244 0.247 0.082 0.263 0.078 0.088 0.047 0.159 0.158 0.117 0.002 0.006
-## [13] 0.003 0.003 0.002 0.002 0.003 0.003 0.001 0.004
-\end{verbatim}
+\includegraphics{code_vars_design_files/figure-latex/plot-1.pdf}
 
 \end{document}

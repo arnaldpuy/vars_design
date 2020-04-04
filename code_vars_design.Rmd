@@ -51,7 +51,7 @@ loadPackages <- function(x) {
 remotes::install_github("arnaldpuy/sensobol")
 
 # Load the packages
-loadPackages(c("tidyverse", "sensobol"))
+loadPackages(c("tidyverse", "sensobol", "data.table"))
 
 
 
@@ -82,6 +82,8 @@ checkpoint("2020-03-09",
 
 # FUNCTION TO CREATE STAR-VARS ------------------------------------------------
 
+# CROSS-SECTIONS WITHOUT STAR CENTER-----------------------------
+
 vars_matrices <- function(N, params, h) {
   out <- center <- sections <- A <- B <- AB <- X <- out <- list()
   mat <- randtoolbox::sobol(n = N, dim = length(params))
@@ -90,10 +92,11 @@ vars_matrices <- function(N, params, h) {
     sections[[i]] <- sapply(center[[i]], function(x) {
       all <- seq(x %% h, 1, h)
       non.zeros <- all[all!= 0] # Remove zeroes
-      })
+    })
     B[[i]] <- sapply(1:ncol(mat), function(x) 
       sections[[i]][, x][!sections[[i]][, x] %in% center[[i]][x]])
-    A[[i]] <- matrix(center[[i]], nrow = nrow(B[[i]]), ncol = length(center[[i]]), byrow = TRUE)
+    A[[i]] <- matrix(center[[i]], nrow = nrow(B[[i]]), 
+                     ncol = length(center[[i]]), byrow = TRUE)
     X[[i]] <- rbind(A[[i]], B[[i]])
     for(j in 1:ncol(A[[i]])) {
       AB[[i]] <- A[[i]]
@@ -132,55 +135,159 @@ vars_ti <- function(Y, N, params, h) {
               out[[x]][, j][length(out[[x]][, j])])
     }))
   out <- lapply(d, function(x) lapply(x, function(y) matrix(y, nrow = length(y) / 2, byrow = TRUE)))
-  variogr <- unlist(lapply(out, function(x)
-    lapply(x, function(y) 1 / 2 * mean(y[, 1] - y[, 2]) ^ 2)) %>%
-      lapply(., function(x) Rfast::colmeans(do.call(rbind, x))))
+  variogr <- unlist(lapply(out, function(x) lapply(x, function(y) 
+    mean(0.5 * (y[, 1] - y[, 2]) ^ 2))) %>%
+      lapply(., function(x) do.call(rbind, x)) %>%
+      lapply(., mean))
   covariogr <- unlist(lapply(out, function(x)
     lapply(x, function(y) cov(y[, 1], y[, 2]))) %>%
       lapply(., function(x) Rfast::colmeans(do.call(rbind, x))))
   VY <- var(Y[index.centers])
-  output <- (variogr + covariogr) / VY
+  Ti <- (variogr + covariogr) / VY
+  output <- data.table::data.table(Ti)
+  output[, `:=`(parameters = params)]
+  return(output)
+}
+
+
+# CROSS-SECTIONS WITH STAR CENTER ----------------------------------
+
+vars_matrices_NEW <- function(N, params, h) {
+  out <- center <- sections <- A <- B <- AB <- X <- out <- list()
+  mat <- randtoolbox::sobol(n = N, dim = length(params))
+  for(i in 1:nrow(mat)) {
+    center[[i]] <- mat[i, ]
+    sections[[i]] <- sapply(mat[i, ], function(x) {
+      all <- seq(x %% h, 1, h)
+      non.zeros <- all[all!= 0] # Remove zeroes
+    })
+    A[[i]] <- matrix(mat[i, ], nrow = nrow(sections[[i]]), 
+                     ncol = ncol(mat), byrow = TRUE)
+    X[[i]] <- rbind(A[[i]], sections[[i]])
+    for(j in 1:ncol(A[[i]])) {
+      AB[[i]] <- A[[i]]
+      AB[[i]][, j] <- sections[[i]][, j]
+      X[[i]] <- rbind(X[[i]], AB[[i]])
+    }
+    AB[[i]] <- X[[i]][(2 * nrow(sections[[i]]) + 1):nrow(X[[i]]), ]
+  }
+  star.vars <- do.call(rbind, AB)
+  tmp <- lapply(1:N, function(x) 
+    rowSums(star.vars == mat[x, ][col(star.vars)]) == ncol(star.vars)) 
+  indices.star.output <- unlist(lapply(1:N, function(x) which(tmp[[x]] == TRUE)[1]))
+  return(list(star.vars, indices.star.output))
+}
+
+pairs_tmp <- function(x, h) {
+  da <- list()
+  for(i in 1:((1/h) - 1)) {
+    da[[i]] <- c(x[i], x[i+1])
+  }
+  out <- do.call(rbind, da)
+  return(out)
+}
+
+pairs_fun <- function(x, h) {
+  da <- list()
+  for(j in 1:ncol(x)) {
+    da[[j]] <- pairs_tmp(x[, j], h = h)
+  }
+  return(da)
+}
+
+vars_ti_NEW <- function(Y, N, indices.var, params, h) {
+  mat <- matrix(Y, ncol = N)
+  indices <- CutBySize(nrow(mat), nb = length(params))
+  out <- list()
+  for(i in 1:nrow(indices)) {
+    out[[i]] <- mat[indices[i, "lower"]:indices[i, "upper"], ]
+  }
+  d <- lapply(out, function(x) pairs_fun(x, h = h))
+  variogr <- unlist(lapply(d, function(x) lapply(x, function(y) 
+    mean(0.5 * (y[, 1] - y[, 2]) ^ 2))) %>%
+      lapply(., function(x) do.call(rbind, x)) %>%
+      lapply(., mean))
+  covariogr <- unlist(lapply(d, function(x)
+    lapply(x, function(y) cov(y[, 1], y[, 2]))) %>%
+      lapply(., function(x) Rfast::colmeans(do.call(rbind, x))))
+  VY <- var(Y[indices.var])
+  Ti <- (variogr + covariogr) / VY
+  output <- data.table::data.table(Ti)
+  output[, `:=`(parameters = params)]
   return(output)
 }
 ```
 
-```{r settings}
+```{r settings, cache=TRUE}
 
-# DEFINE THE SETTINGS FOR A STAR-VARS SAMPLE MATRIX ---------------------------
+# COMPARE RESULTS  ------------------------------------------------------------
 
-N <- 200 # Star centers
-h <- 0.1 # h step
+vars_type <- c("With", "Without")
+test_functions <- c("Ishigami", "Sobol' G", "Morris")
+N <- 200
+h <- 0.2
+
+# Run model
+mat <- Y <- ind <- list()
+for(i in test_functions) {
+  for(j in vars_type) {
+    if(i == "Ishigami") {
+      k <- 3
+      modelRun <- sensobol::ishigami_Fun
+    } else if(i == "Sobol' G") {
+      k <- 8
+      modelRun <- sensobol::sobol_Fun
+    } else if(i == "Morris") {
+      k <- 20
+      modelRun <- sensitivity::morris.fun
+    }
+    if(j == "With") {
+      mat[[i]][[j]] <- vars_matrices_NEW(N = N, 
+                                         params = paste("X", 1:k, sep = ""), 
+                                         h = h)
+      Y[[i]][[j]] <- modelRun(mat[[i]][[j]][[1]])
+      ind[[i]][[j]] <- vars_ti_NEW(Y = Y[[i]][[j]], 
+                                   N = N, 
+                                   indices.var = mat[[i]][[j]][[2]], 
+                                   params = paste("X", 1:k, sep = ""), 
+                                   h = h)
+    } else if(j == "Without") {
+      mat[[i]][[j]] <- vars_matrices(N = N, 
+                                     params = paste("X", 1:k, sep = ""), 
+                                     h = h)
+      Y[[i]][[j]] <- modelRun(mat[[i]][[j]])
+      ind[[i]][[j]] <- vars_ti(Y = Y[[i]][[j]], 
+                                   N = N, 
+                                   params = paste("X", 1:k, sep = ""), 
+                                   h = h)
+    }
+  }
+}
 ```
 
-```{r ishi, cache=TRUE, dependson=c("star", "settings")}
+```{r plot, cache=TRUE, dependson=c("settings", "star_function"), dev="tikz", fig.height=3}
 
-# VARS-TO FOR THE ISHIGAMI FUNCTION -------------------------------------------
+# PLOT RESULTS ----------------------------------------------------------------
 
-params <- paste("X", 1:3, sep = "")
-mat <- vars_matrices(N = N, params = params, h = h)
-Y <- sensobol::ishigami_Fun(mat)
-output <- vars_ti(Y = Y, N = N, params = params, h = h)
-print(round(output, 3))
+lapply(ind, function(x) rbindlist(x, idcol = "Type")) %>%
+  rbindlist(., idcol = "Function") %>%
+  .[, parameters:= factor(parameters, levels = paste("X", 1:20, sep = ""))] %>%
+  .[, Function:= factor(Function, levels = test_functions)] %>%
+  ggplot(., aes(parameters, Ti, fill = Type)) +
+  geom_bar(stat = "identity",
+           position = position_dodge(0.7),
+           color = "black") +
+  scale_fill_discrete(name = expression(paste("VARS "~T[italic(i)])),
+                      labels = c("With star center", "Without star center")) +
+  facet_grid(~Function,
+             scales = "free_x",
+             space = "free_x") +
+  labs(x = "",
+       y = expression(T[italic(i)])) +
+  theme_AP() +
+  theme(axis.text.x = element_text(size = 6.5),
+        legend.position = "top") +
+  guides(fill = guide_legend(nrow = 3,
+                             byrow = TRUE))
 ```
 
-```{r sobolG, cache=TRUE, dependson = c("star", "settings")}
-
-# VARS-TO FOR THE SOBOL' G FUNCTION -------------------------------------------
-
-params <- paste("X", 1:8, sep = "")
-mat <- vars_matrices(N = N, params = params, h = h)
-Y <- sensobol::sobol_Fun(mat)
-output <- vars_ti(Y = Y, N = N, params = params, h = h)
-print(round(output, 3))
-```
-
-```{r morris, cache=TRUE, dependson = c("star", "settings")}
-
-# VARS-TO FOR THE MORRIS FUNCTION -------------------------------------------
-
-params <- paste("X", 1:20, sep = "")
-mat <- vars_matrices(N = N, params = params, h = h)
-Y <- sensitivity::morris.fun(mat)
-output <- vars_ti(Y = Y, N = N, params = params, h = h)
-print(round(output, 3))
-```

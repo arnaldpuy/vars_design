@@ -1,6 +1,10 @@
+# sensobol 0.3
+
+This is the development version.
+
 # sensobol 0.2.2
 
-* This release prepares the package for a major improvement, upcoming in the next weeks.
+* This release prepares the users for a major upcoming improvement of the package.
 
 * Added warnings to the function `sobol_matrices`. The arguments `n` and `k` will
 be substituted by `N` and `params` in the next release of the package. The 
@@ -55,3 +59,4 @@ are now internal.
 # sensobol 0.1.0
 
 * Added a NEWS.md file to track changes to the package.
+
