@@ -11,3 +11,15 @@ forcats
 checkpoint
 sensobol
 data.table
+foreach
+iterators
+doParallel
+scales
+pcaPP
+cowplot
+logitnorm
+benchmarkme
+truncnorm
+Rcpp
+RcppZiggurat
+Rfast

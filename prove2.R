@@ -2,6 +2,22 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 # FUNCTION TO CREATE STAR-VARS ------------------------------------------------
 
 vars_matrices_NEW <- function(N, params, h) {
